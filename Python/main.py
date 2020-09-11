@@ -26,33 +26,44 @@ engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 f
 """Command"""
 #Search from wiki
 def search(requestCommnad):
-    ass_say= (wikipedia.summary(requestCommnad))
-    engine.say(" This one ?")
-    print("Assistant : " + ass_say)
-    engine.runAndWait()      
-    engine.stop()
-  
+    request = requestCommnad.split(" ")
+    query = getVariable("*" , "search_command" , "request = '" +request[1]+ "' ").fetchone()
+
+    #do command
+    if(query is None ):
+        engine.say(" This one ?")
+        print("Assistant : " + wikipedia.summary( request[1] ) )
+        engine.runAndWait()      
+        engine.stop()
+
+        responeValues = wikipedia.summary(request[1]).replace("'s", " is")
+        responeValues = responeValues.replace("'re"," are")
+        responeValues = responeValues.replace("'d"," would")
+
+        insertVariable("search_command"," '"+request[1]+"' , '" +responeValues + "' ")
+    else:
+        engine.say(" This one ?")
+        print("Assistant : " + str(query[2]))
+        engine.runAndWait()      
+        engine.stop()
+
 #Open something
-    # 1 : open file / folder  ; 2 : go to link
 def open_file(requestCommnad):
+    # 1 : open file / folder  ; 2 : go to link
     request = requestCommnad.split(" ")
     query = getVariable("*" , "open_command" , "request = '" +request[1]+ "' ").fetchone() 
 
     #do command
-    if(str(query[3]) == "2"):
-        webbrowser.open( str(query[2]))
-    elif(str(query[2]==1)):
-        subprocess.Popen([str(query[2])])
-
-
-    # if((requestCommnad.find("internet") != -1 or requestCommnad.find("google") != -1)):
-    #     subprocess.Popen(['C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'])
-            
-    # if(requestCommnad.find("facebook") != -1):
-    #     webbrowser.open("http://www.facebook.com/")
-        
-
-
+    if(query is not None):
+        if(str(query[3]) == "2"):
+            webbrowser.open( str(query[2]))
+        elif(str(query[2]=="1")):
+            subprocess.Popen([str(query[2])])
+        # if((requestCommnad.find("internet") != -1 or requestCommnad.find("google") != -1)):
+        #     subprocess.Popen(['C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'])
+                
+        # if(requestCommnad.find("facebook") != -1):
+        #     webbrowser.open("http://www.facebook.com/")
     else:
         engine.say(".I don't understand that command ?")
         print("Assistant : " + "I don't understand that command")
@@ -63,7 +74,7 @@ def open_file(requestCommnad):
 def connectDB():
     return pyodbc.connect('Driver={SQL Server};' 'Server=SHJN\SQLEXPRESS;' 'Database=Assistant;' 'Trusted_Connection=yes;') #connection string
 
-#Get
+#Select
 def getVariable(query , table , condition):
     cursor  = connectDB().cursor()
 
@@ -71,23 +82,14 @@ def getVariable(query , table , condition):
 
     return cursor.execute(query)
 
-#Edit
-def editVariable(query , table , condition):
+#Insert
+def insertVariable(table , values):
     cursor  = connectDB().cursor()
 
-    cursor.execute("select "+query+" from "+table+" ")
+    query = "insert into "+table+" values("+values+")"
 
-    for row in cursor:
-        print(row)
+    cursor.execute(query)
 
-#Delete
-def deleteVariable(table , condition):
-    cursor  = connectDB().cursor()
-
-    cursor.execute("delete from "+table+" where "+condition+"")
-
-    for row in cursor:
-        print(row)
 """Open"""
 ass_listen = sr.Recognizer()
 ass_say= " How can i help you"
