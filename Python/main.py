@@ -26,12 +26,13 @@ engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 f
 """Command"""
 #Search from wiki
 def search(requestCommnad):
-    request = requestCommnad.split(" ")
-    query = getVariable("*" , "search_command" , "request = '" +request[1]+ "' ").fetchone()
+    if requestCommnad.find("open") != -1:
+        request = requestCommnad.split(" ")
+        query = getVariable("*" , "search_command" , "request = '" +request[1]+ "' ").fetchone()
+    query = getVariable("*" , "search_command" , "request = '" +requestCommnad+ "' ").fetchone()
 
     #do command
     if(query is None ):
-        engine.say(" This one ?")
         print("Assistant : " + wikipedia.summary( request[1] ) )
         engine.runAndWait()      
         engine.stop()
@@ -42,11 +43,9 @@ def search(requestCommnad):
 
         insertVariable("search_command"," '"+request[1]+"' , '" +responeValues + "' ")
     else:
-        engine.say(" This one ?")
         print("Assistant : " + str(query[2]))
         engine.runAndWait()      
         engine.stop()
-
 #Open something
 def open_file(requestCommnad):
     # 1 : open file / folder  ; 2 : go to link
@@ -113,10 +112,7 @@ with sr.Microphone() as mic :
         elif(you.find("search") != -1 ) :
             search(you)
         else:
-            engine.say(" I don't understand that command ?")
-            print("Assistant : " + "I don't understand that command")
-            engine.runAndWait()      
-            engine.stop()
+            search(you)
     except:
         engine.say(" I cant hear that ")
         print("Assistant : "+"I cant hear that ")
