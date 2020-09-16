@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import time
 import os
+import playsound
 import pyttsx3
 import pyaudio
 import wave
@@ -8,6 +9,7 @@ import wikipedia
 import subprocess
 import webbrowser
 import pyodbc
+from gtts import gTTS
 """Started"""
 
 
@@ -26,31 +28,31 @@ engine.setProperty('voice', voices[1].id)   #changing index, changes voices. 1 f
 """Command"""
 #Search from wiki
 def search(requestCommnad):
-    if requestCommnad.find("open") != -1:
-        request = requestCommnad.split(" ")
-        query = getVariable("*" , "search_command" , "request = '" +request[1]+ "' ").fetchone()
-    query = getVariable("*" , "search_command" , "request = '" +requestCommnad+ "' ").fetchone()
+    if requestCommnad.find("tìm kiếm") != -1:
+        request = requestCommnad.replace("tìm kiếm","")
+        query = getVariable("*" , "search_command" , "request like '%" +request+ "%' ").fetchone()
+        requestCommnad = request
+    else:
+        query = getVariable("*" , "search_command" , "request like '%" +requestCommnad+ "%' ").fetchone()
 
     #do command
+    wikipedia.set_lang("vi")
+
     if(query is None ):
-        print("Assistant : " + wikipedia.summary( request[1] ) )
-        engine.runAndWait()      
-        engine.stop()
+        print("Trợ lý : " + wikipedia.summary( requestCommnad ) )
 
-        responeValues = wikipedia.summary(request[1]).replace("'s", " is")
-        responeValues = responeValues.replace("'re"," are")
-        responeValues = responeValues.replace("'d"," would")
+        responeValues = wikipedia.summary(requestCommnad)
 
-        insertVariable("search_command"," '"+request[1]+"' , '" +responeValues + "' ")
+        query="N'{0}',N'{1}'".format(requestCommnad,responeValues)
+
+        insertVariable("search_command",query)
     else:
-        print("Assistant : " + str(query[2]))
-        engine.runAndWait()      
-        engine.stop()
+        print("Trợ lý : " + str(query[2]))
 #Open something
 def open_file(requestCommnad):
     # 1 : open file / folder  ; 2 : go to link
     request = requestCommnad.split(" ")
-    query = getVariable("*" , "open_command" , "request = '" +request[1]+ "' ").fetchone() 
+    query = getVariable("*" , "open_command" , "request like '%" +request[1]+ "%' ").fetchone() 
 
     #do command
     if(query is not None):
@@ -64,10 +66,7 @@ def open_file(requestCommnad):
         # if(requestCommnad.find("facebook") != -1):
         #     webbrowser.open("http://www.facebook.com/")
     else:
-        engine.say(".I don't understand that command ?")
-        print("Assistant : " + "I don't understand that command")
-        engine.runAndWait()      
-        engine.stop()
+        assistant_say("Tôi không hiểu lệnh đó")
 
 """Database"""
 def connectDB():
@@ -83,41 +82,51 @@ def getVariable(query , table , condition):
 
 #Insert
 def insertVariable(table , values):
-    cursor  = connectDB().cursor()
-
-    query = "insert into "+table+" values("+values+")"
+    values = values.replace( "","" )
+    connect=connectDB()
+    cursor  = connect.cursor()
+    
+    query = 'insert into {0} values({1})'.format(table,values)
 
     cursor.execute(query)
+    connect.commit()
+    
 
+"""Speech"""
+def assistant_say(temp):
+    tts = gTTS(text = temp , lang = "vi" , slow=False)
+    tts.save("Test.mp3")
+    playsound.playsound("Test.mp3",True)
+    engine.runAndWait()
+    os.remove("Test.mp3")
 """Open"""
 ass_listen = sr.Recognizer()
-ass_say= " How can i help you"
+ass_say= " Tôi có thể giúp gì bạn ?"
+assistant_say(ass_say)
+
 with sr.Microphone() as mic :
-    engine.say(ass_say )
-    print( "Assistant : " + ass_say)
-    engine.runAndWait()
-    engine.stop()
+    # engine.say(ass_say )
+    # print( "Assistant : " + ass_say)
+    # engine.runAndWait()
+    # engine.stop()
 
     #config mic in
     mic.dynamic_energy_threshold = False    #config
-    audio = ass_listen.listen(mic,phrase_time_limit=1)
+    audio = ass_listen.listen(mic,phrase_time_limit=3)
     
     #do request
     try:
-        you = ass_listen.recognize_google(audio).lower()
-        print("You : "+you)
+        you = ass_listen.recognize_google(audio,language="vi-VN").lower()
+        print("Bạn : "+you)
         #Scale request and do command
-        if(you.find("open") != -1 ):
+        if(you.find("mở") != -1 ):
             open_file(you)
-        elif(you.find("search") != -1 ) :
+        elif(you.find("tìm kiếm") != -1 ) :
             search(you)
         else:
             search(you)
     except:
-        engine.say(" I cant hear that ")
-        print("Assistant : "+"I cant hear that ")
-        engine.runAndWait()
-        engine.stop()
+        assistant_say("Tôi không thể nghe thấy")
 
 
 

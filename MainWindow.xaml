@@ -16,7 +16,7 @@
         Topmost="True"
         >
     <Grid x:Name="LayoutRoot">
-        <Border CornerRadius="10" Background="#8000"  Height="50" VerticalAlignment="Center" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <Border CornerRadius="10" Background="#8000"  Height="50" VerticalAlignment="Center" MouseLeftButtonDown="Grid_MouseLeftButtonDown" Width="auto">
             <Grid>
                 <Ellipse Fill="#4888" Margin="5"/>
                 <Ellipse Stroke="#2000" StrokeThickness="1" Fill="#8888" Margin="8"/>

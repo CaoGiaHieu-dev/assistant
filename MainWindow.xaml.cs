@@ -41,6 +41,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+
         }
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -105,69 +106,60 @@ namespace WpfApp1
             {
                 speak = null;
                 speak = PythonInstance.RunFromCmd(path + "main.py");
-                string values = speak;
+                string values = speak.Replace("\r", string.Empty);
                 string[] temp = values.Split('\n');
-
-                // remove a special char
-                var charsToRemove = new string[] { "@", ",", ".", ";", "'","(",")" };
-                foreach (var c in charsToRemove)
+                if (temp[0].Contains("cầu") == false && temp[0].Contains("hình") == false)
                 {
-                    temp[2] = temp[2].Replace(c, string.Empty);
-                }
-
-                for ( int i =0; i< temp[2].Length; i++)
-                {
-                    if(i == y)
+                    if (!temp[0].Contains("mở") || !temp[0].Contains("Mở"))
                     {
-                        Loop: if ( temp[2].Substring(i, 1) == " " )
+                        if (temp[1] != "")
                         {
-                            temp[2] = temp[2].Insert(i, " \n ");
-                            y += 150;
+                            Process notepad = new Process();
+
+                            notepad.StartInfo.FileName = "notepad.exe";
+
+                            notepad.Start();
+
+                            notepad.WaitForInputIdle();
+
+                            NodepadHelper.notepadHandle = notepad.MainWindowHandle;
+
+                            NodepadHelper.WriteLineToNotePad(temp[2]);
                         }
-                        else
-                        {
-                            i = i + 1;
-                            goto Loop;
-                        }
+
                     }
-                }
-                if(!temp[1].Contains("open") || !temp[2].Contains("Open"))
-                {
-                    if(temp[2] != "")
+                    else
                     {
-                        Process notepad = new Process();
+                        var charsToRemove = new string[] { "@", ",", ".", ";", "'", "(", ")" };
+                        foreach (var c in charsToRemove)
+                        {
+                            temp[2] = temp[2].Replace(c, string.Empty);
+                        }
 
-                        notepad.StartInfo.FileName = "notepad.exe";
-
-                        notepad.Start();
-
-                        notepad.WaitForInputIdle();
-
-                        NodepadHelper.notepadHandle = notepad.MainWindowHandle;
-
-                        //YOUR CODE GOES HERE
-
-                        //Example:
-
-                        NodepadHelper.WriteLineToNotePad(temp[2]);
-
-                        //NodepadHelper.SendKeyStroke(Environment.NewLine);
-
-                        //NodepadHelper.WriteLineToNotePad("Scaaaary isn't it?");
-
-                        //AND THEN...
-
-                        //NodepadHelper.waitABitLonger();
-
-                        //notepad.Kill();
-                    }
-
+                        for (int i = 0; i < temp[2].Length; i++)
+                        {
+                            if (i == y)
+                            {
+                            Loop: if (temp[2].Substring(i, 1) == " ")
+                                {
+                                    temp[2] = temp[2].Insert(i, " \n ");
+                                    y += 150;
+                                }
+                                else
+                                {
+                                    i = i + 1;
+                                    goto Loop;
+                                }
+                            }
+                        }
+                    } 
                 }
-
-                if(temp[2] == "")
+                else
                 {
-
+                    Config config = new Config();
+                    config.Show();
                 }
+                
             }
             
         }
