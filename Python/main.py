@@ -45,6 +45,8 @@ def search(requestCommnad):
 
         query="N'{0}',N'{1}'".format(requestCommnad,responeValues)
 
+        deleteVariable("search_command",requestCommnad)
+
         insertVariable("search_command",query)
     else:
         print("Trợ lý : " + str(query[2]))
@@ -52,7 +54,7 @@ def search(requestCommnad):
 def open_file(requestCommnad):
     # 1 : open file / folder  ; 2 : go to link
     request = requestCommnad.split(" ")
-    query = getVariable("*" , "open_command" , "request like '%" +request[1]+ "%' ").fetchone() 
+    query = getVariable("*" , "open_command" , "command like '%" +request[1]+ "%' ").fetchone() 
 
     #do command
     if(query is not None):
@@ -90,7 +92,16 @@ def insertVariable(table , values):
 
     cursor.execute(query)
     connect.commit()
-    
+
+#Delete
+def deleteVariable(table,condition):
+    connect=connectDB()
+    cursor  = connect.cursor()
+
+    query = "DELETE FROM "+table+" WHERE command =N'"+condition+"' "
+
+    cursor.execute(query)
+    connect.commit()
 
 """Speech"""
 def assistant_say(temp):

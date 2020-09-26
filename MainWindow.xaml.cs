@@ -1,46 +1,70 @@
-﻿using Microsoft.Scripting.Hosting;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using WpfApp1.Helper;
-using WpfApp1;
 using System.Windows.Media.Animation;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace WpfApp1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         #region property
         private readonly string path = @"C:\Users\Shjn\Desktop\Assistant\Python\";
         public dynamic speak { get; set; }
+        private string say;
+        private SqlCommand cmd;
+        private string ConnectionString = "Trusted_Connection=yes;" + "Initial Catalog=;" + @"Data Source=SHJN\SQLEXPRESS;";
 
-        
-        #endregion
-       
         // event handdle with order view
         public EventHandler Clicked;
+        #endregion
+
+        #region DB
+        private void CreateTatble()
+        {
+            SqlConnection conn = new SqlConnection(@"Data Source=SHJN\SQLEXPRESS;Initial Catalog=Assistant;Trusted_Connection=yes");
+            conn.Open();
+            try
+            {
+                string open_command = "If not exists (select name from sysobjects where name = 'open_command') CREATE TABLE open_command(ID int identity(1,1) NOT NULL Primary Key,command nvarchar(MAX),request nvarchar(MAX) , type int NOT NULL);";
+                string search_command = "If not exists (select name from sysobjects where name = 'search_command') CREATE TABLE search_command(ID int identity(1,1) NOT NULL Primary Key,command nvarchar(MAX),request nvarchar(MAX));";
+
+                cmd = new SqlCommand(open_command + search_command, conn);
+                cmd.ExecuteNonQuery();
+
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Đã xảy ra lỗi ");
+                conn.Close();
+            }
+        }
+        #endregion
         public MainWindow()
         {
             InitializeComponent();
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "if NOT EXISTS (SELECT name FROM master.dbo.sysdatabases where name ='Assistant') CREATE DATABASE Assistant";
+                try
+                {
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    CreateTatble();
+                    connection.Close();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine( e );
+                    connection.Close();
+                }
+            }
 
         }
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -101,19 +125,57 @@ namespace WpfApp1
 
         private void Ellipse_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            int y = 150;
+            
             if(e.ClickCount >=2)
             {
-                speak = null;
+                //get speeking from python and splitit to array when end of line
                 speak = PythonInstance.RunFromCmd(path + "main.py");
                 string values = speak.Replace("\r", string.Empty);
                 string[] temp = values.Split('\n');
-                if (temp[0].Contains("cầu") == false && temp[0].Contains("hình") == false)
+
+                //get command and do request
+                //check if it'a have config word or not
+                if (temp[0].Contains("cấu") == false && temp[0].Contains("hình") == false)
                 {
+                    //check if it have open word or not
                     if (!temp[0].Contains("mở") || !temp[0].Contains("Mở"))
                     {
+                        //if respone not null
                         if (temp[1] != "")
                         {
+
+                            for ( int a = 1; a<temp.Length;a++)
+                            {
+                                int y = 150;
+                                //remove special char form string
+                                var charsToRemove = new string[] { "@", ",", ".", ";", "'", "(", ")" };
+                                foreach (var c in charsToRemove)
+                                {
+                                    temp[a] = temp[a].Replace(c, string.Empty);
+                                }
+
+                                //Slipt string into a line
+                                for (int i = 0; i < temp[a].Length; i++)
+                                {
+                                    if (i == y)
+                                    {
+                                    Loop: if (temp[a].Substring(i, 1) == " ")
+                                        {
+                                            temp[a] = temp[a].Insert(i, "\n");
+                                            y += 150;
+                                        }
+                                        else
+                                        {
+                                            i += 1;
+                                            goto Loop;
+                                        }
+                                    }
+                                }
+                                say += temp[a];
+                            }
+                            
+
+                            //Write it into notepad
                             Process notepad = new Process();
 
                             notepad.StartInfo.FileName = "notepad.exe";
@@ -124,35 +186,10 @@ namespace WpfApp1
 
                             NodepadHelper.notepadHandle = notepad.MainWindowHandle;
 
-                            NodepadHelper.WriteLineToNotePad(temp[2]);
+                            NodepadHelper.WriteLineToNotePad(say);
                         }
 
                     }
-                    else
-                    {
-                        var charsToRemove = new string[] { "@", ",", ".", ";", "'", "(", ")" };
-                        foreach (var c in charsToRemove)
-                        {
-                            temp[2] = temp[2].Replace(c, string.Empty);
-                        }
-
-                        for (int i = 0; i < temp[2].Length; i++)
-                        {
-                            if (i == y)
-                            {
-                            Loop: if (temp[2].Substring(i, 1) == " ")
-                                {
-                                    temp[2] = temp[2].Insert(i, " \n ");
-                                    y += 150;
-                                }
-                                else
-                                {
-                                    i = i + 1;
-                                    goto Loop;
-                                }
-                            }
-                        }
-                    } 
                 }
                 else
                 {
