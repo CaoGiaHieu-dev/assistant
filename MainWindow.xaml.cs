@@ -135,7 +135,7 @@ namespace WpfApp1
 
                 //get command and do request
                 //check if it'a have config word or not
-                if (temp[0].Contains("cấu") == false && temp[0].Contains("hình") == false)
+                if ((temp[0].Contains("cấu") == false && temp[0].Contains("hình") == false)&&(temp[0].Contains("xem") == false  && temp[0].Contains("danh") == false && temp[0].Contains("sách") == false))
                 {
                     //check if it have open word or not
                     if (!temp[0].Contains("mở") || !temp[0].Contains("Mở"))
@@ -191,10 +191,15 @@ namespace WpfApp1
 
                     }
                 }
-                else
+                else if (temp[0].Contains("cấu") == true && temp[0].Contains("hình") == true)
                 {
                     Config config = new Config();
                     config.Show();
+                }
+                else 
+                {
+                    open_list_command open_List_Command = new open_list_command();
+                    open_List_Command.Show();
                 }
                 
             }

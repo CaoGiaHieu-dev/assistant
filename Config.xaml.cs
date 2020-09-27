@@ -21,7 +21,7 @@ namespace WpfApp1
     /// </summary>
     public partial class Config : Window
     {
-	private static SqlConnection conn = new SqlConnection(@"Data Source=SHJN\SQLEXPRESS;Initial Catalog=Assistant;Trusted_Connection=yes");
+	    private static SqlConnection conn = new SqlConnection(@"Data Source=SHJN\SQLEXPRESS;Initial Catalog=Assistant;Trusted_Connection=yes");
         public Config()
         {
             InitializeComponent();
@@ -75,7 +75,6 @@ namespace WpfApp1
                     {
                         MessageBox.Show("Đã xảy ra lỗi ");
                     }
-
                 }
             }
         }

@@ -35,8 +35,8 @@
                     <ColumnDefinition Width="auto"></ColumnDefinition>
                     <ColumnDefinition Width="auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="Save" VerticalAlignment="Center" HorizontalAlignment="Center" Width="30"  Content="Lưu" Click="Save_Click"></Button>
-                <Button x:Name="Close" VerticalAlignment="Center" HorizontalAlignment="Center" Width="30" Content="Đóng" Grid.Column="1" Click="Close_Click"></Button>
+                <Button x:Name="Save" VerticalAlignment="Center" Padding="5,0,5,0" HorizontalAlignment="Center" Width="30"  Content="Lưu" Click="Save_Click"></Button>
+                <Button x:Name="Close" VerticalAlignment="Center" Padding="5,0,5,0" HorizontalAlignment="Center" Width="auto" Content="Đóng" Grid.Column="1" Click="Close_Click"></Button>
             </Grid>
         </Grid>
         
