@@ -53,15 +53,24 @@ def search(requestCommnad):
 #Open something
 def open_file(requestCommnad):
     # 1 : open file / folder  ; 2 : go to link
-    request = requestCommnad.split(" ")
-    query = getVariable("*" , "open_command" , "command like '%" +request[1]+ "%' ").fetchone() 
+
+    command = requestCommnad.replace("mở ","")
+    
+    query = getVariable("*" , "open_command" , "command= N'" +command+ "' ").fetchone() 
 
     #do command
     if(query is not None):
-        if(str(query[3]) == "2"):
-            webbrowser.open( str(query[2]))
-        elif(str(query[2]=="1")):
-            subprocess.Popen([str(query[2])])
+        try:
+            if(str(query[3]) == "2"):
+                webbrowser.open( str(query[2]))
+            elif(str(query[3]=="1")):
+                try:
+                    subprocess.Popen([str(query[2])])
+                except:
+                    os.startfile(str(query[2]))
+                
+        except:
+            assistant_say("Tôi không hiểu lệnh đó")
         # if((requestCommnad.find("internet") != -1 or requestCommnad.find("google") != -1)):
         #     subprocess.Popen(['C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'])
                 

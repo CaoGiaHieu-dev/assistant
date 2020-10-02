@@ -64,7 +64,7 @@ namespace WpfApp1
                         }
 
                         //insert to table
-                        SqlCommand cmd = new SqlCommand(delete + "insert into open_command values('" + Command.Text + "','" + Request.Text + "'," + type + ");", conn);
+                        SqlCommand cmd = new SqlCommand(delete + "insert into open_command values(N'" + Command.Text + "',N'" + Request.Text + "'," + type + ");", conn);
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Thành công");
                         Command.Text = string.Empty;

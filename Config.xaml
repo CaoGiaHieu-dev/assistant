@@ -13,7 +13,7 @@
         WindowStyle="None" 
         Topmost="True"
         Height="150" Width="300">
-    <Border CornerRadius="30" Background="#4888" Height="auto" VerticalAlignment="Center">
+    <Border CornerRadius="30" Background="DarkCyan" Height="auto" VerticalAlignment="Center">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"></RowDefinition>

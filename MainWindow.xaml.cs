@@ -66,6 +66,9 @@ namespace WpfApp1
                 }
             }
 
+            //Open Readme.txt
+            Notepad.ShowMessage("Các lệnh sử dụng : \n\n-Tìm kiếm : tìm kiếm + {Từ khóa} hoặc {Từ Khóa} \n\n-Mở ứng dụng / trang web : mở + {từ khóa} \n\n-Thiết lập lệnh mở : cấu hình \n\t-Lưu ý : Các dường dẫn đến thu mục không được có dấu \n\n-Xem danh sách các lệnh : xem danh sách \n\n-Sử dụng : \n\t-Nhấp đôi chuốt vào biểu tượng để bắt đầu \n\t-Kéo sang trái hoặc phải để đưa biểu tượng sang 1 góc \n\t-Thay đổi 1 lệnh đã tốn tại bằng cách viết lại lệnh đó", "ReadMe");
+
         }
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
